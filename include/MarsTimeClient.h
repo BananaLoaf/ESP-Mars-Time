@@ -22,7 +22,7 @@ class MarsTimeClient {
         double _minute = 0.0;
         double _second = 0.0;
     public:
-        MarsTimeClient();
+        MarsTimeClient()  = default;
 
         void update(unsigned long epochTime);
         double getMSD();

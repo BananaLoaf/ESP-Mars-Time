@@ -7,15 +7,15 @@
 #include <../lib/esp8266-oled-ssd1306/src/SSD1306Wire.h>
 
 #include <Secrets.h>
-#include <Helpers.h>
 #include <MarsTimeClient.h>
 
+
+SSD1306Wire display(0x3c, SCL, SDA);
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 0, 86400);  // Update once a day
 MarsTimeClient marsTimeClient;
-
-SSD1306Wire display(0x3c, SCL, SDA);
+char buffer[64];
 
 
 void connectToWiFi() {
@@ -42,8 +42,6 @@ String getIP()
 
 
 void setup() {
-    Serial.begin(115200);
-
     display.init();
     display.setContrast(255);
     display.setFont(ArialMT_Plain_10);
@@ -63,13 +61,6 @@ void loop() {
         display.clear();
 
         marsTimeClient.update(timeClient.getEpochTime());
-        String marsDate = "Year " + String(marsTimeClient.getSolYear()) + ", Sol " + String(marsTimeClient.getSolDay());
-        String marsSolTime = zfill(marsTimeClient.getSolHour(), 2) + ":" +
-                             zfill(marsTimeClient.getSolMinute(), 2) + ":" +
-                             zfill(marsTimeClient.getSolSecond(), 2);
-        String marsMetricTime = zfill(marsTimeClient.getHour(), 2) + ":" +
-                                zfill(marsTimeClient.getMinute(), 2) + ":" +
-                                zfill(marsTimeClient.getSecond(), 2);
 
         display.drawHorizontalLine(0, 0, 128);
         display.drawHorizontalLine(0, 63, 128);
@@ -79,11 +70,17 @@ void loop() {
 //        display.drawString(0, 0, WiFi.SSID() + ": " + WiFi.RSSI() + "dBm");
 //        display.drawString(0, 0, getIP());
 
-        display.drawString(2, 5, "UTC: " + getFormattedTime(timeClient) + " " + getFormattedDate(timeClient));
-        display.drawString(2, 15, "MSD: " + String(marsTimeClient.getMSD(), 5));
-        display.drawString(2, 25, "         " + marsDate);
-        display.drawString(2, 35, "MTC: " + marsSolTime);
-        display.drawString(2, 45, "MMT: " + marsMetricTime);  // Martian solar day is 24 hrs, 39 min, 35 sec
+        display.drawStringf(2, 5,  buffer, "UTC: %02d:%02d:%02d %02d.%02d.%i",
+                            timeClient.getHours(), timeClient.getMinutes(), timeClient.getSeconds(),
+                            timeClient.getDay(), timeClient.getMonth(), timeClient.getYear());
+        display.drawStringf(2, 15, buffer, "MSD: %.8f",
+                            marsTimeClient.getMSD());
+        display.drawStringf(2, 25, buffer, "         Year %i, Sol %i",
+                            marsTimeClient.getSolYear(), marsTimeClient.getSolDay());
+        display.drawStringf(2, 35, buffer, "MTC: %02d:%02d:%02d",
+                            marsTimeClient.getSolHour(), marsTimeClient.getSolMinute(), marsTimeClient.getSolSecond());
+        display.drawStringf(2, 45, buffer, "MMT: %02d:%02d:%02d",
+                            marsTimeClient.getHour(), marsTimeClient.getMinute(), marsTimeClient.getSecond());  // Martian solar day is 24 hrs, 39 min, 35 sec
 
         display.display();
         delay(10);

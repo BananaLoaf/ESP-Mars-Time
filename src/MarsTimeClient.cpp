@@ -2,8 +2,6 @@
 #include "math.h"
 
 
-MarsTimeClient::MarsTimeClient() = default;
-
 void MarsTimeClient::update(unsigned long epochTime) {
     this->_epochTime = double(epochTime);
 //    this->_msd = ((this->_epochTime - 947116800 + LEAP_SECONDS) / 86400 / 1.027491252) + 44796.0 - 0.00096;
@@ -17,7 +15,7 @@ void MarsTimeClient::update(unsigned long epochTime) {
     this->_solMinute = modf(this->_solHour, &this->_solHour) * 60;
     this->_solSecond = modf(this->_solMinute, &this->_solMinute) * 60;
 
-    this->_hour = modf(this->_msd, &_) * 24.659790040800004;  // 24.659790040800004;
+    this->_hour = modf(this->_msd, &_) * 24.659790040800004;
     this->_minute = modf(this->_hour, &this->_hour) * 60;
     this->_second = modf(this->_minute, &this->_minute) * 60;
 }
