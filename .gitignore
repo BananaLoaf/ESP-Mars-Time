@@ -1,0 +1,11 @@
+.pio
+CMakeListsPrivate.txt
+cmake-build-*/ 
+
+include/Secrets.h
+
+include/README
+
+lib/README
+
+test/README
